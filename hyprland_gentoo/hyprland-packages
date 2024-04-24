@@ -1,0 +1,34 @@
+#####################################################################
+HYPRLAND
+#####################################################################
+#################锁屏####################
+1, gui-apps/swaylock gui-apps/swayidle 
+2. gui-apps/gtklock  
+#########################################
+x11-misc/rofi #软件启动器
+gui-wm/hyprland #窗口管理器
+gui-apps/waybar #状态栏
+x11-misc/sddm #登陆管理器
+net-wireless/blueman #蓝牙管理面板
+x11-misc/dunst #通知管理器
+gui-libs/xdg-desktop-portal-hyprland
+app-misc/yazi #终端文件管理器
+app-misc/cliphist #系统剪贴板，支持文本及图片
+
+gui-apps/wlogout  #电源功能按钮
+
+#### 截图
+gui-apps/grim gui-apps/slurp gui-apps/wl-clipboard
+#### 亮度调节
+app-misc/brightnessctl
+#### 声音调节
+media-video/pipewire
+media-video/wireplumber
+#media-sound/pnmixer
+#media-sound/playerctl
+
+#####################################################################
+GENTOOLINUX
+#####################################################################
+
+ 
