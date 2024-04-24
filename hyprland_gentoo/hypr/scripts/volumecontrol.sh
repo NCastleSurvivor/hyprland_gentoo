@@ -1,79 +1,58 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
-# define functions
+## Copyright (C) 2023 Ticks <ticks.cc@gmail.com>
+##
+## Set volume in hyprland
+##
 
-function print_error
-{
-	cat <<"EOF"
-    ./volumecontrol.sh -[device] <action>
-    ...valid device are...
-        i -- [i]nput decive
-        o -- [o]utput device
-    ...valid actions are...
-        i -- <i>ncrease volume [+5]
-        d -- <d>ecrease volume [-5]
-        m -- <m>ute [x]
-EOF
+notify_cmd='dunstify -u low -h string:x-dunst-stack-tag:obvolume'
+
+get_volume() {
+	echo "$(wpctl get-volume @DEFAULT_AUDIO_SINK@ | head -1 | awk -F: '{print ($2)*100}' | sed -e 's/\s//g')"
 }
 
-function notify_vol
-{
-	vol=$(pamixer $srce --get-volume | cat)
-	angle="$(((($vol + 2) / 5) * 5))"
-	ico="${icodir}/vol-${angle}.svg"
-	bar=$(seq -s "." $(($vol / 15)) | sed 's/[0-9]//g')
-	dunstify "t2" -a "$vol$bar" "$nsink" -i $ico -r 91190 -t 800
+get_icon() {
+	echo ""
 }
 
-function notify_mute
-{
-	mute=$(pamixer $srce --get-mute | cat)
-	if [ "$mute" == "true" ]; then
-		dunstify "t2" -a "muted" "$nsink" -i ${icodir}/muted-${dvce}.svg -r 91190 -t 800
+notify_user() {
+	${notify_cmd} "Volume: $(get_volume)"
+}
+
+inc_volume() {
+#	if [[ "$(wpctl get-volume @DEFAULT_AUDIO_SINK@ | awk -F: '{print $2}')" < "1.0" ]]; then
+	if [[ $(get_volume) -lt 100 ]]; then
+		wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+ && notify_user
 	else
-		dunstify "t2" -a "unmuted" "$nsink" -i ${icodir}/unmuted-${dvce}.svg -r 91190 -t 800
+		${notify_cmd} "The volume has reached its maximum value"
+	fi
+#	pactl set-sink-volume @DEFAULT_SINK@ +5% && notify_user
+}
+dec_volume() {
+       	wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%- && notify_user
+#	pactl set-sink-volume @DEFAULT_SINK@ -5% && notify_user
+}
+
+toggle_volume() {
+	if [[ "$(wpctl get-volume @DEFAULT_AUDIO_SINK@ | awk '{print $3}')" == "[MUTED]" ]]; then
+		wpctl set-mute @DEFAULT_AUDIO_SINK@ 0 toggle && ${notify_cmd} "UNMUTE"
+	else
+		wpctl set-mute @DEFAULT_AUDIO_SINK@ 1 toggle && ${notify_cmd} "MUTED"
 	fi
 }
 
-# set device source
-
-while getopts io SetSrc; do
-	case $SetSrc in
-	i)
-		nsink=$(pamixer --list-sources | grep "_input." | head -1 | awk -F '" "' '{print $NF}' | sed 's/"//')
-		srce="--default-source"
-		dvce="mic"
-		;;
-	o)
-		nsink=$(pamixer --get-default-sink | grep "_output." | awk -F '" "' '{print $NF}' | sed 's/"//')
-		srce=""
-		dvce="speaker"
-		;;
-	esac
-done
-
-if [ $OPTIND -eq 1 ]; then
-	print_error
+if [[ -x $(which wpctl) ]]; then
+	if [[ "$1" == "--get" ]]; then
+		get_volume
+	elif [[ "$1" == "--inc" ]]; then
+		inc_volume
+	elif [[ "$1" == "--dec" ]]; then
+		dec_volume
+	elif [[ "$1" == "--toggle" ]]; then
+		toggle_volume
+	else
+		echo "$(get_volume)"
+	fi
+else
+	${notify_cmd} "'wpctl' not found !"
 fi
-
-# set device action
-
-shift $((OPTIND - 1))
-step="${2:-5}"
-icodir="~/.config/dunst/icons/vol"
-
-case $1 in
-i)
-	pamixer $srce -i ${step}
-	notify_vol
-	;;
-d)
-	pamixer $srce -d ${step}
-	notify_vol
-	;;
-m)
-	pamixer $srce -t
-	notify_mute
-	;;
-*) print_error ;;
-esac

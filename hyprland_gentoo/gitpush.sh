@@ -9,6 +9,9 @@ cp -rf -u $HOME/.config/alacritty/*  alacritty/
 cp -rf -u $HOME/.config/hypr/*  hypr/
 cp -rf -u $HOME/.config/waybar/* waybar/
 cp -rf -u $HOME/.config/swaylock/* swaylock/
+cp -rf -u $HOME/.config/dunst/* dunst/
+cp -rf -u $HOME/.config/gtklock/* gtklock/
+
 
 # 如果当前工作区没有更改则无需继续进行
 git add .

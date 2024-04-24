@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 
-wall_set = $HOME/.config/hypr/wallpaper/女孩-叶子.jpg
+wall_set = $HOME/.config/hypr/wallpaper/wallhaven-werowr_3840x2160.png
 
 wallpaper_set() {
 	swww img "$wall_set" \
